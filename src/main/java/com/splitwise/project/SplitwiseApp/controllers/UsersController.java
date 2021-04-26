@@ -30,14 +30,11 @@ public class UsersController {
 
         userRepository.save(users);
 
-        return "hello";
+        return "User created";
 
     }
 
-
-
-
-    @RequestMapping("{userName}")
+    @GetMapping("{userName}")
     public  Users getUsers(@PathVariable("userName") String userName){
 
         return userRepository.findByUserName(userName);

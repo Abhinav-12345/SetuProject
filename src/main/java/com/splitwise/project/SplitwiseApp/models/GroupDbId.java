@@ -1,30 +1,21 @@
 package com.splitwise.project.SplitwiseApp.models;
 
-import org.springframework.context.annotation.Primary;
 
-import javax.persistence.*;
+import java.io.Serializable;
 
-@Entity
-@IdClass(GroupDbId.class)
-public class GroupDB {
+public class GroupDbId implements Serializable {
 
-    @Id
     private String groupName;
 
-    @Id
-    private String userName;
-
-
-    public GroupDB() {
+    public GroupDbId() {
     }
 
-    public GroupDB( String groupName, String userName) {
+    private String userName;
 
+    public GroupDbId(String groupName, String userName) {
         this.groupName = groupName;
         this.userName = userName;
     }
-
-
 
     public String getGroupName() {
         return groupName;

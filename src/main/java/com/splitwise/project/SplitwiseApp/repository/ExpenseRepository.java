@@ -16,13 +16,13 @@ public interface ExpenseRepository extends JpaRepository<Expense, String> {
 
     public List<Expense> findByGroupName(String groupName);
 
-    public Expense findBySplitWith(String splitWith);
+    public List<Expense> findBySplitWith(String splitWith);
 
 
 
     @Modifying
     @Transactional
-    @Query("UPDATE  Expense e SET e.amount= 0 where e.splitWith = ?1")
-    public void updateExpenseToSettle(String splitWith);
+    @Query("UPDATE  Expense e SET e.amount= 0 where e.splitWith = ?1 AND e.paidBy = ?2")
+    public void updateExpenseToSettle(String splitWith, String paidTo);
 
 }

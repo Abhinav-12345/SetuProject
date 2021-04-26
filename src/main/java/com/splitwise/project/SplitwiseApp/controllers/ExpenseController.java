@@ -15,9 +15,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
-import javax.ws.rs.BeanParam;
-import javax.ws.rs.QueryParam;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,17 +60,14 @@ public class ExpenseController {
     }
 
 
-    @GetMapping("/getOweList")
-    public List<String> getTheOweList(@Valid @BeanParam String groupName){
+    @GetMapping("/getOweList/{groupName}")
+    public List<String> getTheOweList(String groupName){
 
         List<String> owesList = new ArrayList<>();
-
         if(!groupNameService.isGroupExists(groupName)){
             owesList.add("Enter valid groupName");
             return owesList;
         }
-
-       // List<GroupDB> groupInfo = groupNameService.getAllUsersOfAGroup(groupName);
 
         List<Expense> expenses = expenseService.getExpensesWithPositiveAmount(groupName);
 
@@ -94,25 +88,35 @@ public class ExpenseController {
             return "Any of the user "+settleDTO.getPaidBy()+" or "+settleDTO.getPaidTo()+ " doesnot exists";
         }
 
-        Expense payingExpense = expenseRepository.findBySplitWith(settleDTO.getPaidBy());
+        List<Expense> payingExpense = expenseRepository.findBySplitWith(settleDTO.getPaidBy());
 
-        /*Suppose if a user enter to pay from the user who doesnot owe any amount*/
-        if(payingExpense==null){
-            return "Entered user"+payingExpense.getPaidBy() +" doesnot owe any amount with others";
+        Expense expenseToPay=null;
+
+        for(Expense expense:payingExpense){
+            if(expense.getPaidBy().equals(settleDTO.getPaidTo())){
+                expenseToPay= expense;
+                break;
+            }
         }
-        Expense transaction = payingExpense;
+        /*Suppose if a user enter to pay from the user who doesnot owe any amount*/
+        if(expenseToPay==null){
+            return "Entered user"+expenseToPay.getPaidBy() +" doesnot owe any amount with others";
+        }
+        Expense transaction = expenseToPay;
 
-        Double leftAmount = Math.abs(payingExpense.getAmount() - settleDTO.getAmount());
+        Double leftAmount = Math.abs(expenseToPay.getAmount() - settleDTO.getAmount());
 
         if(leftAmount>=1){
-            return "Please enter the full amount to pay"+" "+payingExpense.getAmount();
+            return "Please enter the full amount to pay"+" "+expenseToPay.getAmount();
         }
 
-        expenseService.updateExpenseToSettle(payingExpense);
+        expenseService.updateExpenseToSettle(expenseToPay);
 
-        transactionService.buildAndSaveTransaction(payingExpense);
 
-        return payingExpense.getSplitWith()+ " Has settled with " + payingExpense.getPaidBy();
+
+        transactionService.buildAndSaveTransaction(expenseToPay);
+
+        return expenseToPay.getSplitWith()+ " Has settled with " + expenseToPay.getPaidBy();
 
     }
 

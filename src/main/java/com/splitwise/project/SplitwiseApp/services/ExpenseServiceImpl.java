@@ -78,7 +78,7 @@ public class ExpenseServiceImpl{
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = { Exception.class })
     public void updateExpenseToSettle(Expense payingExpense){
 
-        expenseRepository.updateExpenseToSettle(payingExpense.getSplitWith());
+        expenseRepository.updateExpenseToSettle(payingExpense.getSplitWith(), payingExpense.getPaidBy());
 
         LOGGER.info(payingExpense.getSplitWith()+ " Has setted with " + payingExpense.getPaidBy());
     }
